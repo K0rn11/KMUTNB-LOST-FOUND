@@ -37,7 +37,7 @@ export default function Navbar() {
           justifyContent: 'space-between',
         }}
       >
-        
+
         <Link
           to="/"
           style={{
@@ -72,7 +72,7 @@ export default function Navbar() {
           </span>
         </Link>
 
-        
+
         <div
           style={{
             display: 'flex',
@@ -82,7 +82,7 @@ export default function Navbar() {
           className="hidden md:flex"
         >
           <NavLink to="/browse">ค้นหาของ</NavLink>
-          {user && <NavLink to="/post">แจ้งของหาย / เก็บได้</NavLink>}
+          {user && <NavLink to="/post">แจ้งของหาย / แจ้งเก็บของได้</NavLink>}
           {user && <NavLink to="/chat">แชท</NavLink>}
           {user?.role === 'admin' && (
             <NavLink to="/admin" accent>
@@ -91,7 +91,7 @@ export default function Navbar() {
           )}
         </div>
 
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {user ? (
             <div style={{ position: 'relative' }}>

@@ -16,7 +16,7 @@ app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173'] }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-require('./db');
+const db = require('./db');
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/items', require('./routes/items'));
 app.use('/api/claims', require('./routes/claims'));
@@ -33,8 +33,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🔍 KMUTNB Lost & Found API Server`);
-  console.log(`   Running on http://localhost:${PORT}`);
-  console.log(`   Health: http://localhost:${PORT}/api/health\n`);
+db.initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`\n🔍 KMUTNB Lost & Found API Server`);
+    console.log(`   Running on http://localhost:${PORT}`);
+    console.log(`   Health: http://localhost:${PORT}/api/health\n`);
+  });
+}).catch(err => {
+  console.error("Failed to initialize database:", err);
+  process.exit(1);
 });

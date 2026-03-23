@@ -24,7 +24,7 @@ const upload = multer({
     cb(null, allowed.includes(ext));
   }
 });
-router.post('/', authenticate, upload.single('evidence'), (req, res) => {
+router.post('/', authenticate, upload.single('evidence'), async (req, res) => {)
   try {
     const { itemId, message } = req.body;
 
@@ -32,7 +32,7 @@ router.post('/', authenticate, upload.single('evidence'), (req, res) => {
       return res.status(400).json({ error: 'กรุณาระบุรายการที่ต้องการขอรับคืน' });
     }
 
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(itemId);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(itemId);
     if (!item) {
       return res.status(404).json({ error: 'ไม่พบรายการนี้' });
     }
@@ -42,7 +42,7 @@ router.post('/', authenticate, upload.single('evidence'), (req, res) => {
     if (item.userId === req.user.userId) {
       return res.status(400).json({ error: 'คุณไม่สามารถขอรับคืนรายการของตัวเองได้' });
     }
-    const existingClaim = db.prepare(
+    const existingClaim = await db.prepare(
       'SELECT * FROM claim_requests WHERE itemId = ? AND requesterId = ? AND status = ?'
     ).get(itemId, req.user.userId, 'WAITING');
     if (existingClaim) {
@@ -52,22 +52,22 @@ router.post('/', authenticate, upload.single('evidence'), (req, res) => {
     const claimId = uuidv4();
     const evidencePhotoUrl = req.file ? `/uploads/evidence/${req.file.filename}` : null;
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO claim_requests (claimId, itemId, requesterId, evidencePhotoUrl, message)
       VALUES (?, ?, ?, ?, ?)
     `).run(claimId, itemId, req.user.userId, evidencePhotoUrl, message || '');
-    db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('PENDING_CLAIM', itemId);
+    await db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('PENDING_CLAIM', itemId);
 
-    const claim = db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(claimId);
+    const claim = await db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(claimId);
     res.status(201).json({ claim });
   } catch (err) {
     console.error('Create claim error:', err);
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/item/:itemId', authenticate, (req, res) => {
+router.get('/item/:itemId', authenticate, async (req, res) => {)
   try {
-    const claims = db.prepare(`
+    const claims = await db.prepare(`
       SELECT cr.*, u.username as requesterName
       FROM claim_requests cr
       JOIN users u ON cr.requesterId = u.userId
@@ -81,9 +81,9 @@ router.get('/item/:itemId', authenticate, (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/my', authenticate, (req, res) => {
+router.get('/my', authenticate, async (req, res) => {)
   try {
-    const claims = db.prepare(`
+    const claims = await db.prepare(`
       SELECT cr.*, i.title as itemTitle, i.photoUrl as itemPhotoUrl
       FROM claim_requests cr
       JOIN items i ON cr.itemId = i.itemId
@@ -97,22 +97,22 @@ router.get('/my', authenticate, (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/:id/accept', authenticate, (req, res) => {
+router.put('/:id/accept', authenticate, async (req, res) => {)
   try {
-    const claim = db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(req.params.id);
+    const claim = await db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(req.params.id);
     if (!claim) {
       return res.status(404).json({ error: 'ไม่พบคำขอนี้' });
     }
 
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(claim.itemId);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(claim.itemId);
     if (item.userId !== req.user.userId && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'คุณไม่มีสิทธิ์อนุมัติคำขอนี้' });
     }
-    db.prepare('UPDATE claim_requests SET status = ? WHERE claimId = ?').run('ACCEPTED', req.params.id);
-    db.prepare(
+    await db.prepare('UPDATE claim_requests SET status = ? WHERE claimId = ?').run('ACCEPTED', req.params.id);
+    await db.prepare(
       'UPDATE claim_requests SET status = ? WHERE itemId = ? AND claimId != ? AND status = ?'
     ).run('REJECTED', claim.itemId, req.params.id, 'WAITING');
-    db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('RETURNED', claim.itemId);
+    await db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('RETURNED', claim.itemId);
 
     res.json({ message: 'อนุมัติคำขอเรียบร้อย — สถานะเปลี่ยนเป็น RETURNED' });
   } catch (err) {
@@ -120,25 +120,25 @@ router.put('/:id/accept', authenticate, (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/:id/reject', authenticate, (req, res) => {
+router.put('/:id/reject', authenticate, async (req, res) => {)
   try {
-    const claim = db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(req.params.id);
+    const claim = await db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(req.params.id);
     if (!claim) {
       return res.status(404).json({ error: 'ไม่พบคำขอนี้' });
     }
 
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(claim.itemId);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(claim.itemId);
     if (item.userId !== req.user.userId && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'คุณไม่มีสิทธิ์ปฏิเสธคำขอนี้' });
     }
 
-    db.prepare('UPDATE claim_requests SET status = ? WHERE claimId = ?').run('REJECTED', req.params.id);
-    const remaining = db.prepare(
+    await db.prepare('UPDATE claim_requests SET status = ? WHERE claimId = ?').run('REJECTED', req.params.id);
+    const remaining = await db.prepare(
       'SELECT COUNT(*) as count FROM claim_requests WHERE itemId = ? AND status = ?'
     ).get(claim.itemId, 'WAITING');
     
     if (remaining.count === 0) {
-      db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('ACTIVE', claim.itemId);
+      await db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('ACTIVE', claim.itemId);
     }
 
     res.json({ message: 'ปฏิเสธคำขอเรียบร้อย' });

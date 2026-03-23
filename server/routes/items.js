@@ -28,7 +28,7 @@ const upload = multer({
     }
   }
 });
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {)
   try {
     const { category, location, type, status, search, page = 1, limit = 20 } = req.query;
     
@@ -59,9 +59,9 @@ router.get('/', (req, res) => {
     const offset = (parseInt(page) - 1) * parseInt(limit);
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-    const countRow = db.prepare(`SELECT COUNT(*) as total FROM items i ${whereClause}`).get(...params);
+    const countRow = await db.prepare(`SELECT COUNT(*) as total FROM items i ${whereClause}`).get(...params);
     
-    const items = db.prepare(`
+    const items = await db.prepare(`
       SELECT i.*, u.username as postedBy
       FROM items i
       JOIN users u ON i.userId = u.userId
@@ -81,9 +81,9 @@ router.get('/', (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {)
   try {
-    const item = db.prepare(`
+    const item = await db.prepare(`
       SELECT i.*, u.username as postedBy
       FROM items i
       JOIN users u ON i.userId = u.userId
@@ -100,7 +100,7 @@ router.get('/:id', (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.post('/', authenticate, upload.single('photo'), (req, res) => {
+router.post('/', authenticate, upload.single('photo'), async (req, res) => {)
   try {
     const { title, description, category, location, type } = req.body;
 
@@ -115,21 +115,21 @@ router.post('/', authenticate, upload.single('photo'), (req, res) => {
     const itemId = uuidv4();
     const photoUrl = req.file ? `/uploads/items/${req.file.filename}` : null;
 
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO items (itemId, userId, title, description, photoUrl, category, location, type)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(itemId, req.user.userId, title, description || '', photoUrl, category, location, type);
 
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(itemId);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(itemId);
     res.status(201).json({ item });
   } catch (err) {
     console.error('Create item error:', err);
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/:id', authenticate, upload.single('photo'), (req, res) => {
+router.put('/:id', authenticate, upload.single('photo'), async (req, res) => {)
   try {
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'ไม่พบรายการนี้' });
     }
@@ -140,7 +140,7 @@ router.put('/:id', authenticate, upload.single('photo'), (req, res) => {
     const { title, description, category, location } = req.body;
     const photoUrl = req.file ? `/uploads/items/${req.file.filename}` : item.photoUrl;
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE items SET title = ?, description = ?, photoUrl = ?, category = ?, location = ?
       WHERE itemId = ?
     `).run(
@@ -152,16 +152,16 @@ router.put('/:id', authenticate, upload.single('photo'), (req, res) => {
       req.params.id
     );
 
-    const updated = db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
+    const updated = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
     res.json({ item: updated });
   } catch (err) {
     console.error('Update item error:', err);
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.delete('/:id', authenticate, (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {)
   try {
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'ไม่พบรายการนี้' });
     }
@@ -169,7 +169,7 @@ router.delete('/:id', authenticate, (req, res) => {
       return res.status(403).json({ error: 'คุณไม่มีสิทธิ์ลบรายการนี้' });
     }
 
-    db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('DELETED', req.params.id);
+    await db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run('DELETED', req.params.id);
     res.json({ message: 'ลบรายการเรียบร้อยแล้ว' });
   } catch (err) {
     console.error('Delete item error:', err);

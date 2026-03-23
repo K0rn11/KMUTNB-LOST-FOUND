@@ -3,7 +3,7 @@ const db = require('../db');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'kmutnb-lost-found-secret-key-2026';
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อน' });
@@ -12,7 +12,7 @@ function authenticate(req, res, next) {
   try {
     const token = header.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = db.prepare('SELECT userId, username, email, role, banned FROM users WHERE userId = ?').get(decoded.userId);
+    const user = await db.prepare('SELECT userId, username, email, role, banned FROM users WHERE userId = ?').get(decoded.userId);
     
     if (!user) {
       return res.status(401).json({ error: 'ไม่พบผู้ใช้งาน' });

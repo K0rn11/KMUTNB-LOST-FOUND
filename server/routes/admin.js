@@ -3,22 +3,22 @@ const router = express.Router();
 const db = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 router.use(authenticate, requireAdmin);
-router.get('/stats', (req, res) => {
+router.get('/stats', async (req, res) => {)
   try {
-    const totalItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE status != ?').get('DELETED');
-    const lostItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE type = ? AND status != ?').get('lost', 'DELETED');
-    const foundItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE type = ? AND status != ?').get('found', 'DELETED');
-    const activeItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('ACTIVE');
-    const pendingItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('PENDING_CLAIM');
-    const returnedItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('RETURNED');
-    const expiredItems = db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('EXPIRED');
-    const totalUsers = db.prepare('SELECT COUNT(*) as count FROM users WHERE role = ?').get('user');
-    const totalClaims = db.prepare('SELECT COUNT(*) as count FROM claim_requests').get();
-    const pendingClaims = db.prepare('SELECT COUNT(*) as count FROM claim_requests WHERE status = ?').get('WAITING');
-    const byCategory = db.prepare(`
+    const totalItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE status != ?').get('DELETED');
+    const lostItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE type = ? AND status != ?').get('lost', 'DELETED');
+    const foundItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE type = ? AND status != ?').get('found', 'DELETED');
+    const activeItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('ACTIVE');
+    const pendingItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('PENDING_CLAIM');
+    const returnedItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('RETURNED');
+    const expiredItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE status = ?').get('EXPIRED');
+    const totalUsers = await db.prepare('SELECT COUNT(*) as count FROM users WHERE role = ?').get('user');
+    const totalClaims = await db.prepare('SELECT COUNT(*) as count FROM claim_requests').get();
+    const pendingClaims = await db.prepare('SELECT COUNT(*) as count FROM claim_requests WHERE status = ?').get('WAITING');
+    const byCategory = await db.prepare(`
       SELECT category, COUNT(*) as count FROM items WHERE status != 'DELETED' GROUP BY category ORDER BY count DESC
     `).all();
-    const monthlyStats = db.prepare(`
+    const monthlyStats = await db.prepare(`
       SELECT 
         strftime('%Y-%m', createdAt) as month,
         COUNT(*) as total,
@@ -51,9 +51,9 @@ router.get('/stats', (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/users', (req, res) => {
+router.get('/users', async (req, res) => {)
   try {
-    const users = db.prepare(`
+    const users = await db.prepare(`
       SELECT userId, username, email, role, banned, createdAt,
         (SELECT COUNT(*) FROM items WHERE userId = users.userId) as itemCount
       FROM users
@@ -66,9 +66,9 @@ router.get('/users', (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/users/:id/ban', (req, res) => {
+router.put('/users/:id/ban', async (req, res) => {)
   try {
-    const user = db.prepare('SELECT * FROM users WHERE userId = ?').get(req.params.id);
+    const user = await db.prepare('SELECT * FROM users WHERE userId = ?').get(req.params.id);
     if (!user) {
       return res.status(404).json({ error: 'ไม่พบผู้ใช้งาน' });
     }
@@ -77,7 +77,7 @@ router.put('/users/:id/ban', (req, res) => {
     }
 
     const newBanned = user.banned ? 0 : 1;
-    db.prepare('UPDATE users SET banned = ? WHERE userId = ?').run(newBanned, req.params.id);
+    await db.prepare('UPDATE users SET banned = ? WHERE userId = ?').run(newBanned, req.params.id);
 
     res.json({ message: newBanned ? 'ระงับบัญชีเรียบร้อย' : 'ยกเลิกการระงับบัญชีเรียบร้อย' });
   } catch (err) {
@@ -85,7 +85,7 @@ router.put('/users/:id/ban', (req, res) => {
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/items/:id/status', (req, res) => {
+router.put('/items/:id/status', async (req, res) => {)
   try {
     const { status } = req.body;
     const validStatuses = ['ACTIVE', 'PENDING_CLAIM', 'RETURNED', 'EXPIRED', 'DELETED'];
@@ -94,19 +94,19 @@ router.put('/items/:id/status', (req, res) => {
       return res.status(400).json({ error: 'สถานะไม่ถูกต้อง' });
     }
 
-    const item = db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
+    const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'ไม่พบรายการนี้' });
     }
 
-    db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run(status, req.params.id);
+    await db.prepare('UPDATE items SET status = ? WHERE itemId = ?').run(status, req.params.id);
     res.json({ message: `อัปเดตสถานะเป็น ${status} เรียบร้อย` });
   } catch (err) {
     console.error('Update status error:', err);
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/claims', (req, res) => {
+router.get('/claims', async (req, res) => {)
   try {
     const { status } = req.query;
     let query = `
@@ -126,14 +126,14 @@ router.get('/claims', (req, res) => {
 
     query += ' ORDER BY cr.createdAt DESC';
 
-    const claims = db.prepare(query).all(...params);
+    const claims = await db.prepare(query).all(...params);
     res.json({ claims });
   } catch (err) {
     console.error('List all claims error:', err);
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/items', (req, res) => {
+router.get('/items', async (req, res) => {)
   try {
     const { status, type, search } = req.query;
     let where = [];
@@ -154,7 +154,7 @@ router.get('/items', (req, res) => {
 
     const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-    const items = db.prepare(`
+    const items = await db.prepare(`
       SELECT i.*, u.username as postedBy
       FROM items i
       JOIN users u ON i.userId = u.userId
