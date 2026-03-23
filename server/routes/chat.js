@@ -3,7 +3,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { authenticate } = require('../middleware/auth');
-router.post('/rooms', authenticate, async (req, res) => {)
+router.post('/rooms', authenticate, async (req, res) => {
   try {
     const { itemId, otherUserId } = req.body;
 
@@ -37,7 +37,7 @@ router.post('/rooms', authenticate, async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/rooms', authenticate, async (req, res) => {)
+router.get('/rooms', authenticate, async (req, res) => {
   try {
     const rooms = await db.prepare(`
       SELECT cr.chatId, cr.itemId, cr.createdAt,
@@ -58,7 +58,7 @@ router.get('/rooms', authenticate, async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/rooms/:chatId/messages', authenticate, async (req, res) => {)
+router.get('/rooms/:chatId/messages', authenticate, async (req, res) => {
   try {
     const participant = await db.prepare(
       'SELECT * FROM chat_participants WHERE chatId = ? AND userId = ?'
@@ -82,7 +82,7 @@ router.get('/rooms/:chatId/messages', authenticate, async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.post('/rooms/:chatId/messages', authenticate, async (req, res) => {)
+router.post('/rooms/:chatId/messages', authenticate, async (req, res) => {
   try {
     const { content } = req.body;
 

@@ -28,7 +28,7 @@ const upload = multer({
     }
   }
 });
-router.get('/', async (req, res) => {)
+router.get('/', async (req, res) => {
   try {
     const { category, location, type, status, search, page = 1, limit = 20 } = req.query;
     
@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/:id', async (req, res) => {)
+router.get('/:id', async (req, res) => {
   try {
     const item = await db.prepare(`
       SELECT i.*, u.username as postedBy
@@ -100,7 +100,7 @@ router.get('/:id', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.post('/', authenticate, upload.single('photo'), async (req, res) => {)
+router.post('/', authenticate, upload.single('photo'), async (req, res) => {
   try {
     const { title, description, category, location, type } = req.body;
 
@@ -127,7 +127,7 @@ router.post('/', authenticate, upload.single('photo'), async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/:id', authenticate, upload.single('photo'), async (req, res) => {)
+router.put('/:id', authenticate, upload.single('photo'), async (req, res) => {
   try {
     const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
     if (!item) {
@@ -159,7 +159,7 @@ router.put('/:id', authenticate, upload.single('photo'), async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.delete('/:id', authenticate, async (req, res) => {)
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const item = await db.prepare('SELECT * FROM items WHERE itemId = ?').get(req.params.id);
     if (!item) {

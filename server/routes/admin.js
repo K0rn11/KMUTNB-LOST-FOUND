@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 router.use(authenticate, requireAdmin);
-router.get('/stats', async (req, res) => {)
+router.get('/stats', async (req, res) => {
   try {
     const totalItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE status != ?').get('DELETED');
     const lostItems = await db.prepare('SELECT COUNT(*) as count FROM items WHERE type = ? AND status != ?').get('lost', 'DELETED');
@@ -51,7 +51,7 @@ router.get('/stats', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/users', async (req, res) => {)
+router.get('/users', async (req, res) => {
   try {
     const users = await db.prepare(`
       SELECT userId, username, email, role, banned, createdAt,
@@ -66,7 +66,7 @@ router.get('/users', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/users/:id/ban', async (req, res) => {)
+router.put('/users/:id/ban', async (req, res) => {
   try {
     const user = await db.prepare('SELECT * FROM users WHERE userId = ?').get(req.params.id);
     if (!user) {
@@ -85,7 +85,7 @@ router.put('/users/:id/ban', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/items/:id/status', async (req, res) => {)
+router.put('/items/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
     const validStatuses = ['ACTIVE', 'PENDING_CLAIM', 'RETURNED', 'EXPIRED', 'DELETED'];
@@ -106,7 +106,7 @@ router.put('/items/:id/status', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/claims', async (req, res) => {)
+router.get('/claims', async (req, res) => {
   try {
     const { status } = req.query;
     let query = `
@@ -133,7 +133,7 @@ router.get('/claims', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/items', async (req, res) => {)
+router.get('/items', async (req, res) => {
   try {
     const { status, type, search } = req.query;
     let where = [];

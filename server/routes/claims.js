@@ -24,7 +24,7 @@ const upload = multer({
     cb(null, allowed.includes(ext));
   }
 });
-router.post('/', authenticate, upload.single('evidence'), async (req, res) => {)
+router.post('/', authenticate, upload.single('evidence'), async (req, res) => {
   try {
     const { itemId, message } = req.body;
 
@@ -65,7 +65,7 @@ router.post('/', authenticate, upload.single('evidence'), async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/item/:itemId', authenticate, async (req, res) => {)
+router.get('/item/:itemId', authenticate, async (req, res) => {
   try {
     const claims = await db.prepare(`
       SELECT cr.*, u.username as requesterName
@@ -81,7 +81,7 @@ router.get('/item/:itemId', authenticate, async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/my', authenticate, async (req, res) => {)
+router.get('/my', authenticate, async (req, res) => {
   try {
     const claims = await db.prepare(`
       SELECT cr.*, i.title as itemTitle, i.photoUrl as itemPhotoUrl
@@ -97,7 +97,7 @@ router.get('/my', authenticate, async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/:id/accept', authenticate, async (req, res) => {)
+router.put('/:id/accept', authenticate, async (req, res) => {
   try {
     const claim = await db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(req.params.id);
     if (!claim) {
@@ -120,7 +120,7 @@ router.put('/:id/accept', authenticate, async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.put('/:id/reject', authenticate, async (req, res) => {)
+router.put('/:id/reject', authenticate, async (req, res) => {
   try {
     const claim = await db.prepare('SELECT * FROM claim_requests WHERE claimId = ?').get(req.params.id);
     if (!claim) {

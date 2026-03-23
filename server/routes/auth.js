@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { authenticate, JWT_SECRET } = require('../middleware/auth');
-router.post('/register', async (req, res) => {)
+router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -39,7 +39,7 @@ router.post('/register', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.post('/login', async (req, res) => {)
+router.post('/login', async (req, res) => {
   try {
     const { login, password } = req.body;
 
@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {)
     res.status(500).json({ error: 'เกิดข้อผิดพลาดในระบบ' });
   }
 });
-router.get('/me', authenticate, async (req, res) => {)
+router.get('/me', authenticate, async (req, res) => {
   res.json({ user: req.user });
 });
 
