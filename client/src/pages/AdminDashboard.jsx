@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils';
 import { IconChart, IconPackage, IconUsers, IconClipboard, IconCheck, IconX } from '../components/Icons';
 
 const STATUS_OPTIONS = ['ACTIVE', 'PENDING_CLAIM', 'RETURNED', 'EXPIRED', 'DELETED'];
@@ -250,7 +251,7 @@ export default function AdminDashboard() {
                       <td style={tdStyle}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           {item.photoUrl && (
-                            <img src={item.photoUrl} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }} />
+                            <img src={getImageUrl(item.photoUrl)} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover' }} />
                           )}
                           <span style={{ fontWeight: 500 }}>{item.title}</span>
                         </div>
@@ -320,10 +321,10 @@ export default function AdminDashboard() {
                     {claim.message && <p style={{ fontSize: 14, color: 'var(--color-stone)', marginBottom: 8 }}>{claim.message}</p>}
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                       {claim.evidencePhotoUrl && (
-                        <img src={claim.evidencePhotoUrl} alt="evidence" style={{ width: 100, height: 70, objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                        <img src={getImageUrl(claim.evidencePhotoUrl)} alt="evidence" style={{ width: 100, height: 70, objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                       )}
                       {claim.itemPhotoUrl && (
-                        <img src={claim.itemPhotoUrl} alt="item" style={{ width: 100, height: 70, objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                        <img src={getImageUrl(claim.itemPhotoUrl)} alt="item" style={{ width: 100, height: 70, objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
                       )}
                     </div>
                     {claim.status === 'WAITING' && (

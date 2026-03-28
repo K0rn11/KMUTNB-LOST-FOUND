@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils';
 import { IconPackage, IconPin, IconFolder, IconUser, IconCalendar, IconHand, IconChat, IconCheck, IconX } from '../components/Icons';
 
 export default function ItemDetail() {
@@ -104,7 +105,7 @@ export default function ItemDetail() {
             }}
           >
             {item.photoUrl ? (
-              <img src={item.photoUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={getImageUrl(item.photoUrl)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}><IconPackage size={64} style={{ opacity: 0.4 }} /></div>
             )}
@@ -246,7 +247,7 @@ export default function ItemDetail() {
                 </div>
                 {claim.message && <p style={{ fontSize: 14, color: 'var(--color-stone)', marginBottom: 10 }}>{claim.message}</p>}
                 {claim.evidencePhotoUrl && (
-                  <img src={claim.evidencePhotoUrl} alt="evidence" style={{ width: 150, height: 100, objectFit: 'cover', borderRadius: 'var(--radius-sm)', marginBottom: 10 }} />
+                  <img src={getImageUrl(claim.evidencePhotoUrl)} alt="evidence" style={{ width: 150, height: 100, objectFit: 'cover', borderRadius: 'var(--radius-sm)', marginBottom: 10 }} />
                 )}
                 {claim.status === 'WAITING' && (
                   <div style={{ display: 'flex', gap: 8 }}>

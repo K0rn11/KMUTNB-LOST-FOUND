@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { CategoryIcon, IconPin } from './Icons';
+import { getImageUrl } from '../utils';
+import { CategoryIcon, IconPin } from './Icons';
 
 export default function ItemCard({ item, style = {} }) {
   const timeAgo = getTimeAgo(item.createdAt);
@@ -38,7 +40,7 @@ export default function ItemCard({ item, style = {} }) {
       >
         {item.photoUrl ? (
           <img
-            src={item.photoUrl}
+            src={getImageUrl(item.photoUrl)}
             alt={item.title}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             loading="lazy"
