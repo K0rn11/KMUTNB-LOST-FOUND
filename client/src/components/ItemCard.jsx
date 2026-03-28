@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { CategoryIcon, IconPin } from './Icons';
 import { getImageUrl } from '../utils';
-import { CategoryIcon, IconPin } from './Icons';
 
 export default function ItemCard({ item, style = {} }) {
   const timeAgo = getTimeAgo(item.createdAt);
